@@ -212,6 +212,7 @@ public class ConfigurationView {
             composeConfigurationView();
             basePanel.updateUI();
             basePanel.revalidate();
+            GradleFileMaker.writeGradleFile(basePath, currentProps);
         });
         basePanel.add(f5, gc1);
 

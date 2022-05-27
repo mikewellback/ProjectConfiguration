@@ -227,11 +227,9 @@ public class ConfigurationProperty {
                 }
                 fw.append(line);
                 fw.append('\n');
-                System.out.println(line);
                 if (line2 != null) {
                     fw.append(line2);
                     fw.append('\n');
-                    System.out.println(line2);
                 }
             }
         } catch (IOException e) {
