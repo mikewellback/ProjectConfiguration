@@ -12,7 +12,8 @@ public class GradleFileMaker {
     public static final String GRADLE_FILE_NAME = "config.gradle";
 
     public static String createGradleFileContent(ConfigurationProperty[] props) {
-        StringBuilder baseBuilder = new StringBuilder("\n" +
+        StringBuilder baseBuilder = new StringBuilder("// remember to add to your ROOT build.gradle file:\n" +
+                "//    apply from: \"config.gradle\"\n" +
                 "buildscript {\n" +
                 "    Properties props = new Properties()\n" +
                 "    def propFile = file('config.properties')\n" +
