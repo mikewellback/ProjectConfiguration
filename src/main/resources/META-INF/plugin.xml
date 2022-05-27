@@ -1,0 +1,28 @@
+<idea-plugin>
+    <id>ProjectConfiguration</id>
+    <name>Android Simple Configuration</name>
+    <version>0.1.0 beta</version>
+    <vendor email="mikb89@hotmail.it" url="https://github.com/mikewellback/ProjectConfiguration">mikewellback</vendor>
+    <description><![CDATA[
+        <i>Android Studio</i> plugin that shows a simple interface to allow fast project configuration.
+        ]]></description>
+
+    <!-- see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html -->
+    <idea-version since-build="201.5985"/>
+
+    <!-- see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html -->
+    <depends>com.intellij.modules.platform</depends>
+    <depends>org.jetbrains.android</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!--applicationService
+                serviceImplementation="org.mikewellback.plugins.project_configuration.Settings" /-->
+        <toolWindow
+                id="Project Configuration"
+                anchor="left"
+                secondary="true"
+                icon="AllIcons.Actions.Properties"
+                factoryClass="org.mikewellback.plugins.project_configuration.ConfigurationViewFactory" />
+    </extensions>
+
+</idea-plugin>
