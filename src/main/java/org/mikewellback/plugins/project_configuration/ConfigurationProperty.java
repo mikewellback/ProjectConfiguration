@@ -151,11 +151,15 @@ public class ConfigurationProperty {
         }
     }
 
+    public static File getFile(String filePath) {
+        return new File(filePath + "/" + ConfigurationProperty.CONFIG_FILE_NAME);
+    }
+
     public static void writeProperties(String filePath, ConfigurationProperty[] props) {
-        File file = new File(filePath + "/" + CONFIG_FILE_NAME);
+        File file = getFile(filePath);
         try (FileWriter fw = new FileWriter(file)) {
             fw.flush();
-            for (ConfigurationProperty prop : props) {
+            for (ConfigurationProperty prop: props) {
                 String line = "";
                 String line2 = null;
                 if (!prop.isValue()) {
@@ -239,8 +243,7 @@ public class ConfigurationProperty {
     public static ConfigurationProperty[] readProperties(String filePath) {
         List<ConfigurationProperty> l = new ArrayList<>();
         String prevLine = null;
-        File file = new File(filePath + "/" + CONFIG_FILE_NAME);
-        try (Scanner input = new Scanner(file)) {
+        try (Scanner input = new Scanner(getFile(filePath))) {
             while (input.hasNextLine()) {
                 String line = input.nextLine();
                 if (line.startsWith("#")) {

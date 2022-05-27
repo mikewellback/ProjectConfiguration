@@ -33,11 +33,17 @@ public class VirtualFileChangeListener implements VirtualFileListener {
     @Override
     public void fileDeleted(@NotNull VirtualFileEvent event) {
         VirtualFileListener.super.fileDeleted(event);
+        if (listener != null) {
+            listener.contentsDeleted(event);
+        }
     }
 
     @Override
     public void fileMoved(@NotNull VirtualFileMoveEvent event) {
         VirtualFileListener.super.fileMoved(event);
+        if (listener != null) {
+            listener.contentsDeleted(event);
+        }
     }
 
     @Override
@@ -67,5 +73,6 @@ public class VirtualFileChangeListener implements VirtualFileListener {
 
     public interface ContentsChangedListener extends EventListener {
         void contentsChanged(@NotNull VirtualFileEvent event);
+        void contentsDeleted(@NotNull VirtualFileEvent event);
     }
 }

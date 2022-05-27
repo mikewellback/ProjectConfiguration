@@ -5,6 +5,7 @@ import com.intellij.openapi.vfs.*;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -24,21 +25,79 @@ public class ConfigurationView {
 
     public ConfigurationView(String basePath, ToolWindow toolWindow) {
         this.basePath = basePath;
-        LocalFileSystem.getInstance().addVirtualFileListener(new VirtualFileChangeListener(event -> {
-            if (ConfigurationProperty.CONFIG_FILE_NAME.equals(event.getFileName())) {
-                composeView();
-                basePanel.updateUI();
-                basePanel.revalidate();
-            }
-        }));
+        LocalFileSystem.getInstance().addVirtualFileListener(new VirtualFileChangeListener(
+                new VirtualFileChangeListener.ContentsChangedListener() {
+                    @Override
+                    public void contentsChanged(@NotNull VirtualFileEvent event) {
+                        if (ConfigurationProperty.CONFIG_FILE_NAME.equals(event.getFileName())) {
+                            composeConfigurationView();
+                            basePanel.updateUI();
+                            basePanel.revalidate();
+                        }
+                    }
+
+                    @Override
+                    public void contentsDeleted(@NotNull VirtualFileEvent event) {
+                        if (ConfigurationProperty.CONFIG_FILE_NAME.equals(event.getFileName())) {
+                            composeEmptyView();
+                            basePanel.updateUI();
+                            basePanel.revalidate();
+                        }
+                    }
+                })
+        );
     }
 
     public JComponent initView() {
-        composeView();
+        if (ConfigurationProperty.getFile(basePath).exists()) {
+            composeConfigurationView();
+        } else {
+            composeEmptyView();
+        }
         return new JBScrollPane(basePanel);
     }
 
-    private void composeView() {
+    private void composeEmptyView() {
+        GridBagLayout glm = new GridBagLayout();
+        Insets ins = JBUI.insets(5, 15);
+        basePanel.removeAll();
+        basePanel.setLayout(glm);
+        JLabel info = new JLabel("Properties configuration file not found");
+        GridBagConstraints gc = new GridBagConstraints();
+        gc.gridy = 0;
+        gc.insets = ins;
+        basePanel.add(info, gc);
+        GridBagConstraints gc1 = new GridBagConstraints();
+        gc1.gridy = 1;
+        gc1.insets = ins;
+        JButton create = new JButton("Create it now");
+        create.addActionListener(e -> {
+            ConfigurationProperty dummy = new ConfigurationProperty(" # this is a sample configurable property");
+            dummy.setName("hello");
+            dummy.setValue("world");
+            dummy.setType(ConfigurationProperty.PropertyType.TEXT);
+            currentProps = new ConfigurationProperty[]{dummy};
+            ConfigurationProperty.writeProperties(basePath, currentProps);
+            composeConfigurationView();
+            basePanel.updateUI();
+            basePanel.revalidate();
+        });
+        basePanel.add(create, gc1);
+        GridBagConstraints gc2 = new GridBagConstraints();
+        gc2.gridy = 2;
+        gc2.insets = ins;
+        JButton check = new JButton("Check again");
+        check.addActionListener(e -> {
+            if (ConfigurationProperty.getFile(basePath).exists()) {
+                composeConfigurationView();
+                basePanel.updateUI();
+                basePanel.revalidate();
+            }
+        });
+        basePanel.add(check, gc2);
+    }
+
+    private void composeConfigurationView() {
         currentProps = ConfigurationProperty.readProperties(basePath);
         int vn = 0;
         for (ConfigurationProperty prop: currentProps) {
@@ -148,21 +207,21 @@ public class ConfigurationView {
         GridBagConstraints gc1 = new GridBagConstraints();
         gc1.gridy = r;
         gc1.gridx = 0;
-        JButton ctrls = new JButton("Save");
-        ctrls.addActionListener(e -> {
-            ConfigurationProperty.writeProperties(basePath, currentProps);
+        JButton f5 = new JButton("Refresh");
+        f5.addActionListener(e -> {
+            composeConfigurationView();
+            basePanel.updateUI();
+            basePanel.revalidate();
         });
-        basePanel.add(ctrls, gc1);
+        basePanel.add(f5, gc1);
 
         GridBagConstraints gc2 = new GridBagConstraints();
         gc2.gridy = r;
         gc2.gridx = 1;
-        JButton f5 = new JButton("Refresh");
-        f5.addActionListener(e -> {
-            composeView();
-            basePanel.updateUI();
-            basePanel.revalidate();
+        JButton ctrls = new JButton("Save");
+        ctrls.addActionListener(e -> {
+            ConfigurationProperty.writeProperties(basePath, currentProps);
         });
-        basePanel.add(f5, gc2);
+        basePanel.add(ctrls, gc2);
     }
 }
