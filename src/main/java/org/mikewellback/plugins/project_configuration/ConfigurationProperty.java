@@ -15,6 +15,36 @@ public class ConfigurationProperty {
         BOOLEAN, NUMBER, TEXT, ARRAY, LOCKED, UNDEFINED
     }
 
+    public static ConfigurationProperty[] getDummyProps() {
+        ConfigurationProperty dummy = new ConfigurationProperty(" # this is a sample configurable property");
+        dummy.setName("hello");
+        dummy.setValue("world");
+        dummy.setType(ConfigurationProperty.PropertyType.TEXT);
+        return new ConfigurationProperty[] {
+                new ConfigurationProperty("# --------------------------------------------------------------------------------"),
+                new ConfigurationProperty("# You can edit this file adding all the properties you need as usual: key=value"),
+                new ConfigurationProperty("# Properties without a comment will be used as TEXT, but you can set other"),
+                new ConfigurationProperty("# types or declare the TEXT type explicitly. To do this, add a comment (#) on"),
+                new ConfigurationProperty("# the line before the one with the property, followed by the letter of the type:"),
+                new ConfigurationProperty("# - TEXT: #t (free text input)"),
+                new ConfigurationProperty("# - LOCKED: #l (seen as a non-editable label)"),
+                new ConfigurationProperty("# - NUMBER: #n (you get number input and increase/decrease arrows)"),
+                new ConfigurationProperty("# - BOOLEAN: #b (shows a checkbox)"),
+                new ConfigurationProperty("# - ARRAY: #a [...] (providing arguments, will show a dropdown selector)"),
+                new ConfigurationProperty("# For NUMBER, BOOLEAN and ARRAY, you should set your properties values correctly"),
+                new ConfigurationProperty("# (a number for NUMBER, true/false for BOOLEAN, valid value for ARRAY)"),
+                new ConfigurationProperty("# The ARRAY type expects to have valid values separated by spaces after the \"#a \""),
+                new ConfigurationProperty("# If you want to use a space on an array value, write \"\\s\""),
+                new ConfigurationProperty("# If you want to use a \"#\" on an array value, write \"\\h\""),
+                new ConfigurationProperty("# If you want to use a \"\\\" on an array value, write \"\\\\\""),
+                new ConfigurationProperty("#"),
+                new ConfigurationProperty("# That's all, hope a visual editor come soon!"),
+                new ConfigurationProperty("# --------------------------------------------------------------------------------"),
+                new ConfigurationProperty(""),
+                dummy
+        };
+    }
+
     private String name;
     private String value;
     private PropertyType type;
@@ -51,7 +81,7 @@ public class ConfigurationProperty {
         if (prevLine == null || prevLine.isBlank()) {
             type = PropertyType.TEXT;
             values = new String[0];
-            comment = prevLine;
+            comment = "";
         } else {
             String[] args = prevLine.split(" ");
             if (args.length < 1 || args[0].length() < 2) {
@@ -103,7 +133,8 @@ public class ConfigurationProperty {
                                     }
                                 }
                             }
-                            String[] fields = prevLine.substring(0, commIndex).split(" ");
+                            String cmds = commIndex == -1 ? prevLine : prevLine.substring(0, commIndex);
+                            String[] fields = cmds.split(" ");
                             values = new String[fields.length - 1];
                             for (int i = 1; i < fields.length; i++) {
                                 StringBuilder fixed = new StringBuilder();
@@ -133,7 +164,7 @@ public class ConfigurationProperty {
                                 }
                                 values[i - 1] = fixed.toString();
                             }
-                            comment = spaces.toString() + prevLine.substring(commIndex);
+                            comment = spaces.append(commIndex == -1 ? "" : prevLine.substring(commIndex)).toString();
                         }
                         break;
                     case "l":
@@ -260,7 +291,12 @@ public class ConfigurationProperty {
                     }
                 } else if (prevLine != null) {
                     l.add(new ConfigurationProperty(prevLine));
+                    if (line.isBlank()) {
+                        l.add(new ConfigurationProperty(""));
+                    }
                     prevLine = null;
+                } else if (line.isBlank()) {
+                    l.add(new ConfigurationProperty(""));
                 }
             }
         } catch (FileNotFoundException e) {

@@ -72,11 +72,7 @@ public class ConfigurationView {
         gc1.insets = ins;
         JButton create = new JButton("Create it now");
         create.addActionListener(e -> {
-            ConfigurationProperty dummy = new ConfigurationProperty(" # this is a sample configurable property");
-            dummy.setName("hello");
-            dummy.setValue("world");
-            dummy.setType(ConfigurationProperty.PropertyType.TEXT);
-            currentProps = new ConfigurationProperty[]{dummy};
+            currentProps = ConfigurationProperty.getDummyProps();
             ConfigurationProperty.writeProperties(basePath, currentProps);
             composeConfigurationView();
             basePanel.updateUI();
